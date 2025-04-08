@@ -1,6 +1,10 @@
+using AutoMapper;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using MinimalAPI.Data;
 using MinimalAPI.Models;
+using MinimalAPI.Models.DTOs;
+using MinimalAPI.Validations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAutoMapper(typeof(MinimalAPI.AutoMapper.MapperDTOs));
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
 
@@ -33,87 +41,177 @@ if (app.Environment.IsDevelopment())
 //    return Results.Ok($"Parametro recibido {parameter}");
 //});
 
-app.MapGet("/api/propiedades", () =>
+
+app.MapGet("/api/propiedades", (ILogger<Program> logger) =>
 {
-    return Results.Ok(DatosPropiedad.Propiedades);
-});
+
+    logger.LogInformation("Se ha solicitado la lista de propiedades.");
+
+    ApiResponse response = new ApiResponse
+    {
+        Success = true,
+        Result = DatosPropiedad.Propiedades,
+        StatusCode = System.Net.HttpStatusCode.OK
+    };
+
+    return Results.Ok(response);
+}).WithName("GetPropiedades").Produces<ApiResponse>(200);
 
 app.MapGet("/api/propiedades/{id:int}", (int id) =>
 {
-    var propiedad = DatosPropiedad.Propiedades.FirstOrDefault(p => p.IdPropiedad == id);
-    if (propiedad == null)
-    {
-        return Results.NotFound();
-    }
-    return Results.Ok(propiedad);
-});
 
-app.MapPost("/api/propiedades", ([FromBody] Propiedad propiedad) =>
+    ApiResponse response = new ApiResponse
+    {
+        Success = true,
+        Result = DatosPropiedad.Propiedades.FirstOrDefault(p => p.IdPropiedad == id),
+        StatusCode = System.Net.HttpStatusCode.OK
+    };
+
+    if (response.Result == null)
+    {
+        response.Success = false;
+        response.StatusCode = System.Net.HttpStatusCode.NotFound;
+        response.Errores = new List<string> { "No se encontró la propiedad." };
+        return Results.NotFound(response);
+    }
+
+    return Results.Ok(response);
+}).WithName("GetPropiedad").Produces<ApiResponse>(200);
+
+app.MapPost("/api/propiedades", async (IMapper _mapper, IValidator<AddPropiedadDTO> _validation, [FromBody] AddPropiedadDTO dto) =>
 {
-    if (propiedad == null || propiedad.IdPropiedad != 0 || string.IsNullOrWhiteSpace(propiedad.Nombre))
+    ApiResponse response = new()
     {
-        return Results.BadRequest();
+        Success = false,
+        Result = null,
+        StatusCode = System.Net.HttpStatusCode.BadRequest,
+        Errores = []
+    };
+
+    var resultValidation = await _validation.ValidateAsync(dto);
+
+    if (!resultValidation.IsValid)
+    {
+        response.Success = false;
+        response.StatusCode = System.Net.HttpStatusCode.BadRequest;
+        response.Errores = resultValidation.Errors.Select(e => e.ErrorMessage).ToList();
+        return Results.BadRequest(response);
     }
 
-    if(DatosPropiedad.Propiedades.FirstOrDefault(p => p.Nombre.ToLower() == propiedad.Nombre.ToLower()) != null)
+    if (DatosPropiedad.Propiedades.FirstOrDefault(p => p.Nombre.ToLower() == dto.Nombre.ToLower()) != null)
     {
-        return Results.Conflict("Ya existe una propiedad con ese nombre.");
+        response.Success = false;
+        response.StatusCode = System.Net.HttpStatusCode.BadRequest;
+        response.Errores = new List<string> { "Ya existe una propiedad con ese nombre." };
+        return Results.BadRequest(response);
     }
-    if (string.IsNullOrWhiteSpace(propiedad.Descripcion) || string.IsNullOrWhiteSpace(propiedad.Ubicacion))
+
+    if (string.IsNullOrWhiteSpace(dto.Descripcion) || string.IsNullOrWhiteSpace(dto.Ubicacion))
     {
-        return Results.BadRequest("La descripción y la ubicación son obligatorias.");
+        response.Success = false;
+        response.StatusCode = System.Net.HttpStatusCode.BadRequest;
+        response.Errores = new List<string> { "La descripción y la ubicación son obligatorias." };
+        return Results.BadRequest(response);
     }
-    if (propiedad.FechaCreacion == null)
-    {
-        propiedad.FechaCreacion = DateTime.UtcNow;
-    }
+
+    Propiedad propiedad = _mapper.Map<Propiedad>(dto);
 
     propiedad.IdPropiedad = DatosPropiedad.Propiedades.Max(p => p.IdPropiedad) + 1;
 
     DatosPropiedad.Propiedades.Add(propiedad);
-    return Results.Created($"/api/propiedades/{propiedad.IdPropiedad}", propiedad);
-});
 
-app.MapPut("/api/propiedades/{id:int}", (int id, [FromBody] Propiedad propiedad) =>
+    PropiedadDTO propiedadDTO = _mapper.Map<PropiedadDTO>(propiedad);
+
+    response.Success = true;
+    response.Result = propiedadDTO;
+    response.StatusCode = System.Net.HttpStatusCode.Created;
+
+    return Results.Ok(response);
+}).WithName("PostPropiedad").Accepts<PropiedadDTO>("application/json").Produces<ApiResponse>(201).Produces(400);
+
+
+app.MapPut("/api/propiedades/{id:int}", async (IMapper _mapper, IValidator<UpdatePropiedadDTO> _validation, int id, [FromBody] UpdatePropiedadDTO dto) =>
 {
+    ApiResponse response = new()
+    {
+        Success = false,
+        Result = null,
+        StatusCode = System.Net.HttpStatusCode.BadRequest,
+        Errores = []
+    };
+    var resultValidation = await _validation.ValidateAsync(dto);
+    if (!resultValidation.IsValid)
+    {
+        response.Success = false;
+        response.StatusCode = System.Net.HttpStatusCode.BadRequest;
+        response.Errores = resultValidation.Errors.Select(e => e.ErrorMessage).ToList();
+        return Results.BadRequest(response);
+    }
+    if (DatosPropiedad.Propiedades.FirstOrDefault(p => p.Nombre.ToLower() == dto.Nombre.ToLower() && p.IdPropiedad != id) != null)
+    {
+        response.Success = false;
+        response.StatusCode = System.Net.HttpStatusCode.BadRequest;
+        response.Errores = new List<string> { "Ya existe una propiedad con ese nombre." };
+        return Results.BadRequest(response);
+    }
+    if (string.IsNullOrWhiteSpace(dto.Descripcion) || string.IsNullOrWhiteSpace(dto.Ubicacion))
+    {
+        response.Success = false;
+        response.StatusCode = System.Net.HttpStatusCode.BadRequest;
+        response.Errores = new List<string> { "La descripción y la ubicación son obligatorias." };
+        return Results.BadRequest(response);
+    }
+
     var existingPropiedad = DatosPropiedad.Propiedades.FirstOrDefault(p => p.IdPropiedad == id);
     if (existingPropiedad == null)
     {
-        return Results.NotFound();
+        response.Success = false;
+        response.StatusCode = System.Net.HttpStatusCode.NotFound;
+        response.Errores = new List<string> { "No se encontró la propiedad." };
+        return Results.NotFound(response);
     }
-    existingPropiedad.Nombre = propiedad.Nombre;
-    existingPropiedad.Descripcion = propiedad.Descripcion;
-    existingPropiedad.Ubicacion = propiedad.Ubicacion;
-    existingPropiedad.Activa = propiedad.Activa;
-    existingPropiedad.FechaCreacion = propiedad.FechaCreacion;
-    return Results.Ok(existingPropiedad);
-});
 
-app.MapPatch("/api/propiedades/{id:int}", (int id, [FromBody] Propiedad propiedad) =>
-{
-    var existingPropiedad = DatosPropiedad.Propiedades.FirstOrDefault(p => p.IdPropiedad == id);
-    if (existingPropiedad == null)
-    {
-        return Results.NotFound();
-    }
-    existingPropiedad.Nombre = propiedad.Nombre;
-    existingPropiedad.Descripcion = propiedad.Descripcion;
-    existingPropiedad.Ubicacion = propiedad.Ubicacion;
-    existingPropiedad.Activa = propiedad.Activa;
-    existingPropiedad.FechaCreacion = propiedad.FechaCreacion;
-    return Results.Ok(existingPropiedad);
-});
+    existingPropiedad.Nombre = dto.Nombre;
+    existingPropiedad.Descripcion = dto.Descripcion;
+    existingPropiedad.Ubicacion = dto.Ubicacion;
+    existingPropiedad.Activa = dto.Activa;
+
+    PropiedadDTO propiedadDTO = _mapper.Map<PropiedadDTO>(existingPropiedad);
+
+    response.Success = true;
+    response.Result = propiedadDTO;
+    response.StatusCode = System.Net.HttpStatusCode.OK;
+
+    return Results.Ok(response);
+}).WithName("PutPropiedad").Accepts<UpdatePropiedadDTO>("application/json").Produces<ApiResponse>();
+
 
 app.MapDelete("/api/propiedades/{id:int}", (int id) =>
 {
-    var propiedad = DatosPropiedad.Propiedades.FirstOrDefault(p => p.IdPropiedad == id);
-    if (propiedad == null)
+    ApiResponse response = new()
     {
-        return Results.NotFound();
+        Success = false,
+        Result = null,
+        StatusCode = System.Net.HttpStatusCode.BadRequest,
+        Errores = []
+    };
+
+    var existingPropiedad = DatosPropiedad.Propiedades.FirstOrDefault(p => p.IdPropiedad == id);
+    if (existingPropiedad == null)
+    {
+        response.Success = false;
+        response.StatusCode = System.Net.HttpStatusCode.NotFound;
+        response.Errores = new List<string> { "No se encontró la propiedad." };
+        return Results.NotFound(response);
     }
-    DatosPropiedad.Propiedades.Remove(propiedad);
-    return Results.NoContent();
-});
+
+    DatosPropiedad.Propiedades.Remove(existingPropiedad);
+    response.Success = true;
+    response.Result = existingPropiedad;
+    response.StatusCode = System.Net.HttpStatusCode.OK;
+
+    return Results.Ok(response);
+}).WithName("DeletePropiedad");
 
 app.UseHttpsRedirection();
 
