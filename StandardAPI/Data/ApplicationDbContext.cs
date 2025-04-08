@@ -1,9 +1,9 @@
-﻿using ApiCurso.Model;
+﻿using ApiNET.Model;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Emit;
 
-namespace ApiCurso.Data
+namespace ApiNET.Data
 {
     public class ApplicationDbContext : IdentityDbContext<AppUsuario>
     {

@@ -1,4 +1,4 @@
-﻿namespace ApiCurso.Model.Dto.Usuario
+﻿namespace ApiNET.Model.Dto.Usuario
 {
     public class UsuarioLoginResponseDto
     {

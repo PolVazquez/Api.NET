@@ -1,8 +1,8 @@
-﻿using ApiCurso.Model.Dto.Pelicula.Common;
+﻿using ApiNET.Model.Dto.Pelicula.Common;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ApiCurso.Model
+namespace ApiNET.Model
 {
     public class Pelicula
     {

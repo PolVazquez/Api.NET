@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ApiCurso.Model.Dto.Usuario
+namespace ApiNET.Model.Dto.Usuario
 {
     public class UsuarioRegisterDto
     {

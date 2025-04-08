@@ -1,8 +1,8 @@
-﻿using ApiCurso.Data;
-using ApiCurso.Model;
-using ApiCurso.Repository.IRepository;
+﻿using ApiNET.Data;
+using ApiNET.Model;
+using ApiNET.Repository.IRepository;
 
-namespace ApiCurso.Repository
+namespace ApiNET.Repository
 {
     public class CategoriaRepository : ICategoriaRepository
     {

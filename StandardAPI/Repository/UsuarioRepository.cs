@@ -1,8 +1,8 @@
-﻿using ApiCurso.Data;
-using ApiCurso.Model;
-using ApiCurso.Model.Dto.Usuario;
-using ApiCurso.Repository.IRepository;
-using ApiCurso.Security;
+﻿using ApiNET.Data;
+using ApiNET.Model;
+using ApiNET.Model.Dto.Usuario;
+using ApiNET.Repository.IRepository;
+using ApiNET.Security;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace ApiCurso.Repository
+namespace ApiNET.Repository
 {
     public class UsuarioRepository : IUsuarioRepository
     {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace ApiCurso.Model
+namespace ApiNET.Model
 {
     public class AppUsuario : IdentityUser
     {

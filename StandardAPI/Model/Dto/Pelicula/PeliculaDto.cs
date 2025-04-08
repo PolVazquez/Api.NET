@@ -1,6 +1,6 @@
-﻿using ApiCurso.Model.Dto.Pelicula.Common;
+﻿using ApiNET.Model.Dto.Pelicula.Common;
 
-namespace ApiCurso.Model.Dto.Pelicula
+namespace ApiNET.Model.Dto.Pelicula
 {
     public class PeliculaDto
     {

@@ -1,6 +1,6 @@
-﻿using ApiCurso.Model;
+﻿using ApiNET.Model;
 
-namespace ApiCurso.Repository.IRepository
+namespace ApiNET.Repository.IRepository
 {
     public interface IPeliculaRepository
     {

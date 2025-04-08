@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ApiCurso.Model.Dto.Categoria
+namespace ApiNET.Model.Dto.Categoria
 {
     public class CategoriaDto
     {

@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace ApiCurso.Model
+namespace ApiNET.Model
 {
     public class ResponseAPI
     {

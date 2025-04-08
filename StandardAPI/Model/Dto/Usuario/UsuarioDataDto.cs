@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace ApiCurso.Model.Dto.Usuario
+namespace ApiNET.Model.Dto.Usuario
 {
     public class UsuarioDataDto
     {

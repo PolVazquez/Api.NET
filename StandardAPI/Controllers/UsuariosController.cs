@@ -1,6 +1,6 @@
-﻿using ApiCurso.Model;
-using ApiCurso.Model.Dto.Usuario;
-using ApiCurso.Repository.IRepository;
+﻿using ApiNET.Model;
+using ApiNET.Model.Dto.Usuario;
+using ApiNET.Repository.IRepository;
 using Asp.Versioning;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace ApiCurso.Controllers
+namespace ApiNET.Controllers
 {
     [Authorize(Roles = "admin")]
     [Route("api/v{version:apiVersion}/usuarios")]

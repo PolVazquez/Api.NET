@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ApiCurso.Migrations
+namespace ApiNET.Migrations
 {
     /// <inheritdoc />
     public partial class Inicial : Migration

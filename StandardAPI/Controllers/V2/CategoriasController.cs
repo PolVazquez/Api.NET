@@ -1,10 +1,10 @@
-﻿using ApiCurso.Repository.IRepository;
+﻿using ApiNET.Repository.IRepository;
 using Asp.Versioning;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ApiCurso.Controllers.V2
+namespace ApiNET.Controllers.V2
 {
     [Authorize(Roles = "admin")]
     [ApiVersion("2.0")]

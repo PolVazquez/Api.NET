@@ -1,8 +1,8 @@
-using ApiCurso.Data;
-using ApiCurso.Mapper;
-using ApiCurso.Model;
-using ApiCurso.Repository;
-using ApiCurso.Repository.IRepository;
+using ApiNET.Data;
+using ApiNET.Mapper;
+using ApiNET.Model;
+using ApiNET.Repository;
+using ApiNET.Repository.IRepository;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -61,9 +61,9 @@ builder.Services.AddSwaggerGen(options =>
     });
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Api Curso v1",
+        Title = "Api NET v1",
         Version = "1.0",
-        Description = "API para el curso de ASP.NET Core Web API con C# y SQL Server",
+        Description = "API de ASP.NET Core Web API con C# y SQL Server",
         TermsOfService = new Uri("https://example.com/terms"),
         Contact = new OpenApiContact()
         {
@@ -78,9 +78,9 @@ builder.Services.AddSwaggerGen(options =>
     });
     options.SwaggerDoc("v2", new OpenApiInfo
     {
-        Title = "Api Curso v2",
+        Title = "Api NET v2",
         Version = "2.0",
-        Description = "API para el curso de ASP.NET Core Web API con C# y SQL Server",
+        Description = "API de ASP.NET Core Web API con C# y SQL Server",
         TermsOfService = new Uri("https://example.com/terms"),
         Contact = new OpenApiContact()
         {
@@ -159,8 +159,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Api Curso v1");
-        options.SwaggerEndpoint("/swagger/v2/swagger.json", "Api Curso v2");
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Api NET v1");
+        options.SwaggerEndpoint("/swagger/v2/swagger.json", "Api NET v2");
     });
 }
 

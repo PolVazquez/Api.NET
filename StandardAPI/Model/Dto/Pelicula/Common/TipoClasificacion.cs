@@ -1,4 +1,4 @@
-﻿namespace ApiCurso.Model.Dto.Pelicula.Common
+﻿namespace ApiNET.Model.Dto.Pelicula.Common
 {
     public enum TipoClasificacion
     {

@@ -1,9 +1,9 @@
-﻿using ApiCurso.Data;
-using ApiCurso.Model;
-using ApiCurso.Repository.IRepository;
+﻿using ApiNET.Data;
+using ApiNET.Model;
+using ApiNET.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 
-namespace ApiCurso.Repository
+namespace ApiNET.Repository
 {
     public class PeliculaRepository : IPeliculaRepository
     {

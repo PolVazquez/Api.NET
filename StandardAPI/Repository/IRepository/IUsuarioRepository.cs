@@ -1,7 +1,7 @@
-﻿using ApiCurso.Model;
-using ApiCurso.Model.Dto.Usuario;
+﻿using ApiNET.Model;
+using ApiNET.Model.Dto.Usuario;
 
-namespace ApiCurso.Repository.IRepository
+namespace ApiNET.Repository.IRepository
 {
     public interface IUsuarioRepository
     {

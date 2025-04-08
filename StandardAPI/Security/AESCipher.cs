@@ -1,4 +1,4 @@
-﻿namespace ApiCurso.Security
+﻿namespace ApiNET.Security
 {
     using System;
     using System.IO;

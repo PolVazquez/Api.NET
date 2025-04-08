@@ -1,12 +1,12 @@
-﻿using ApiCurso.Model;
-using ApiCurso.Model.Dto.Pelicula;
-using ApiCurso.Repository.IRepository;
+﻿using ApiNET.Model;
+using ApiNET.Model.Dto.Pelicula;
+using ApiNET.Repository.IRepository;
 using Asp.Versioning;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ApiCurso.Controllers.V1
+namespace ApiNET.Controllers.V1
 {
     [Authorize(Roles = "admin")]
     [Route("api/v{version:apiVersion}/peliculas")]

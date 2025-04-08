@@ -1,10 +1,10 @@
-﻿using ApiCurso.Model;
-using ApiCurso.Model.Dto.Categoria;
-using ApiCurso.Model.Dto.Pelicula;
-using ApiCurso.Model.Dto.Usuario;
+﻿using ApiNET.Model;
+using ApiNET.Model.Dto.Categoria;
+using ApiNET.Model.Dto.Pelicula;
+using ApiNET.Model.Dto.Usuario;
 using AutoMapper;
 
-namespace ApiCurso.Mapper
+namespace ApiNET.Mapper
 {
     public class EntityToDtoReverseMapper : Profile
     {
