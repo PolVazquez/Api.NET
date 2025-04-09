@@ -1,12 +1,15 @@
 using AutoMapper;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MinimalAPI.Data;
 using MinimalAPI.Models;
 using MinimalAPI.Models.DTOs;
-using MinimalAPI.Validations;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -42,7 +45,7 @@ if (app.Environment.IsDevelopment())
 //});
 
 
-app.MapGet("/api/propiedades", (ILogger<Program> logger) =>
+app.MapGet("/api/propiedades", async (ApplicationDbContext _db, ILogger<Program> logger) =>
 {
 
     logger.LogInformation("Se ha solicitado la lista de propiedades.");
@@ -50,20 +53,20 @@ app.MapGet("/api/propiedades", (ILogger<Program> logger) =>
     ApiResponse response = new ApiResponse
     {
         Success = true,
-        Result = DatosPropiedad.Propiedades,
+        Result = _db.Propiedades,
         StatusCode = System.Net.HttpStatusCode.OK
     };
 
     return Results.Ok(response);
 }).WithName("GetPropiedades").Produces<ApiResponse>(200);
 
-app.MapGet("/api/propiedades/{id:int}", (int id) =>
+app.MapGet("/api/propiedades/{id:int}", async (ApplicationDbContext _db, int id) =>
 {
 
     ApiResponse response = new ApiResponse
     {
         Success = true,
-        Result = DatosPropiedad.Propiedades.FirstOrDefault(p => p.IdPropiedad == id),
+        Result = await _db.Propiedades.FirstOrDefaultAsync(p => p.IdPropiedad == id),
         StatusCode = System.Net.HttpStatusCode.OK
     };
 
@@ -78,7 +81,7 @@ app.MapGet("/api/propiedades/{id:int}", (int id) =>
     return Results.Ok(response);
 }).WithName("GetPropiedad").Produces<ApiResponse>(200);
 
-app.MapPost("/api/propiedades", async (IMapper _mapper, IValidator<AddPropiedadDTO> _validation, [FromBody] AddPropiedadDTO dto) =>
+app.MapPost("/api/propiedades", async (ApplicationDbContext _db, IMapper _mapper, IValidator<AddPropiedadDTO> _validation, [FromBody] AddPropiedadDTO dto) =>
 {
     ApiResponse response = new()
     {
@@ -98,7 +101,7 @@ app.MapPost("/api/propiedades", async (IMapper _mapper, IValidator<AddPropiedadD
         return Results.BadRequest(response);
     }
 
-    if (DatosPropiedad.Propiedades.FirstOrDefault(p => p.Nombre.ToLower() == dto.Nombre.ToLower()) != null)
+    if (await _db.Propiedades.FirstOrDefaultAsync(p => p.Nombre.ToLower() == dto.Nombre.ToLower()) != null)
     {
         response.Success = false;
         response.StatusCode = System.Net.HttpStatusCode.BadRequest;
@@ -115,10 +118,9 @@ app.MapPost("/api/propiedades", async (IMapper _mapper, IValidator<AddPropiedadD
     }
 
     Propiedad propiedad = _mapper.Map<Propiedad>(dto);
-
-    propiedad.IdPropiedad = DatosPropiedad.Propiedades.Max(p => p.IdPropiedad) + 1;
-
-    DatosPropiedad.Propiedades.Add(propiedad);
+    propiedad.FechaCreacion = DateTime.UtcNow;
+    await _db.Propiedades.AddAsync(propiedad);
+    await _db.SaveChangesAsync();
 
     PropiedadDTO propiedadDTO = _mapper.Map<PropiedadDTO>(propiedad);
 
@@ -130,7 +132,7 @@ app.MapPost("/api/propiedades", async (IMapper _mapper, IValidator<AddPropiedadD
 }).WithName("PostPropiedad").Accepts<PropiedadDTO>("application/json").Produces<ApiResponse>(201).Produces(400);
 
 
-app.MapPut("/api/propiedades/{id:int}", async (IMapper _mapper, IValidator<UpdatePropiedadDTO> _validation, int id, [FromBody] UpdatePropiedadDTO dto) =>
+app.MapPut("/api/propiedades/{id:int}", async (ApplicationDbContext _db, IMapper _mapper, IValidator<UpdatePropiedadDTO> _validation, int id, [FromBody] UpdatePropiedadDTO dto) =>
 {
     ApiResponse response = new()
     {
@@ -147,7 +149,7 @@ app.MapPut("/api/propiedades/{id:int}", async (IMapper _mapper, IValidator<Updat
         response.Errores = resultValidation.Errors.Select(e => e.ErrorMessage).ToList();
         return Results.BadRequest(response);
     }
-    if (DatosPropiedad.Propiedades.FirstOrDefault(p => p.Nombre.ToLower() == dto.Nombre.ToLower() && p.IdPropiedad != id) != null)
+    if (await _db.Propiedades.FirstOrDefaultAsync(p => p.Nombre.ToLower() == dto.Nombre.ToLower() && p.IdPropiedad != id) != null)
     {
         response.Success = false;
         response.StatusCode = System.Net.HttpStatusCode.BadRequest;
@@ -162,7 +164,7 @@ app.MapPut("/api/propiedades/{id:int}", async (IMapper _mapper, IValidator<Updat
         return Results.BadRequest(response);
     }
 
-    var existingPropiedad = DatosPropiedad.Propiedades.FirstOrDefault(p => p.IdPropiedad == id);
+    var existingPropiedad = await _db.Propiedades.FirstOrDefaultAsync(p => p.IdPropiedad == id);
     if (existingPropiedad == null)
     {
         response.Success = false;
@@ -176,6 +178,8 @@ app.MapPut("/api/propiedades/{id:int}", async (IMapper _mapper, IValidator<Updat
     existingPropiedad.Ubicacion = dto.Ubicacion;
     existingPropiedad.Activa = dto.Activa;
 
+    await _db.SaveChangesAsync();
+
     PropiedadDTO propiedadDTO = _mapper.Map<PropiedadDTO>(existingPropiedad);
 
     response.Success = true;
@@ -186,7 +190,7 @@ app.MapPut("/api/propiedades/{id:int}", async (IMapper _mapper, IValidator<Updat
 }).WithName("PutPropiedad").Accepts<UpdatePropiedadDTO>("application/json").Produces<ApiResponse>();
 
 
-app.MapDelete("/api/propiedades/{id:int}", (int id) =>
+app.MapDelete("/api/propiedades/{id:int}", async (ApplicationDbContext _db, int id) =>
 {
     ApiResponse response = new()
     {
@@ -196,7 +200,7 @@ app.MapDelete("/api/propiedades/{id:int}", (int id) =>
         Errores = []
     };
 
-    var existingPropiedad = DatosPropiedad.Propiedades.FirstOrDefault(p => p.IdPropiedad == id);
+    var existingPropiedad = await _db.Propiedades.FirstOrDefaultAsync(p => p.IdPropiedad == id);
     if (existingPropiedad == null)
     {
         response.Success = false;
@@ -205,7 +209,8 @@ app.MapDelete("/api/propiedades/{id:int}", (int id) =>
         return Results.NotFound(response);
     }
 
-    DatosPropiedad.Propiedades.Remove(existingPropiedad);
+    _db.Propiedades.Remove(existingPropiedad);
+    await _db.SaveChangesAsync();
     response.Success = true;
     response.Result = existingPropiedad;
     response.StatusCode = System.Net.HttpStatusCode.OK;

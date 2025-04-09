@@ -1,7 +1,10 @@
-﻿namespace MinimalAPI.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MinimalAPI.Models
 {
     public class Propiedad
     {
+        [Key]
         public int IdPropiedad { get; set; }
         public string Nombre { get; set; }
         public string Descripcion { get; set; }
